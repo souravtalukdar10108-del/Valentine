@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Will You Be My Valentine 💖</title>
+<title>My Valentine 💖</title>
 
 <style>
     body {
@@ -21,23 +21,24 @@
 
     .card {
         background: #1a1a24;
-        padding: 30px 20px;
+        padding: 32px 22px;
         border-radius: 18px;
         width: 90%;
         max-width: 360px;
-        box-shadow: 0 0 25px rgba(255, 105, 180, 0.35);
+        box-shadow: 0 0 28px rgba(255, 105, 180, 0.35);
+        position: relative;
     }
 
     h1 {
         font-size: 1.6rem;
-        margin-bottom: 10px;
+        margin-bottom: 12px;
     }
 
     p {
         font-size: 0.95rem;
         opacity: 0.85;
-        margin-bottom: 20px;
-        line-height: 1.5;
+        margin-bottom: 22px;
+        line-height: 1.6;
     }
 
     button {
@@ -46,8 +47,7 @@
         font-size: 1rem;
         border-radius: 30px;
         margin: 10px;
-        cursor: pointer;
-        transition: all 0.3s ease;
+        transition: all 0.35s ease;
     }
 
     #yes {
@@ -61,6 +61,18 @@
         position: relative;
     }
 
+    .hint {
+        font-size: 0.75rem;
+        opacity: 0.6;
+        margin-top: 15px;
+    }
+
+    .countdown {
+        font-size: 1.1rem;
+        margin-top: 18px;
+        letter-spacing: 1px;
+    }
+
     .heart {
         position: fixed;
         bottom: 0;
@@ -72,25 +84,18 @@
         0% { transform: translateY(0); opacity: 1; }
         100% { transform: translateY(-100vh); opacity: 0; }
     }
-
-    .hint {
-        font-size: 0.75rem;
-        opacity: 0.6;
-        margin-top: 15px;
-    }
 </style>
 </head>
 
 <body>
 
-<!-- Background Music -->
 <audio id="bgm" loop>
     <source src="music.mp3" type="audio/mpeg">
 </audio>
 
 <div class="card" id="card">
-    <h1>Will you be my Valentine? 💖</h1>
-    <p>Because every day with you already feels special 🌹</p>
+    <h1 id="title">Will you be my Valentine? 💖</h1>
+    <p id="text">Because every day with you already feels special 🌹</p>
 
     <button id="yes">Yes 💕</button>
     <button id="no">No 😅</button>
@@ -101,22 +106,26 @@
 <script>
     const yesBtn = document.getElementById("yes");
     const noBtn = document.getElementById("no");
+    const text = document.getElementById("text");
     const card = document.getElementById("card");
     const music = document.getElementById("bgm");
 
-    let yesScale = 1;
-    let noClicks = 0;
+    let noCount = 0;
 
-    // Start music after first tap (mobile-friendly)
+    const noMessages = [
+        "Think again, love 💭",
+        "Are you sure, babe? 🥺",
+        "This might break my heart 💔",
+        "Last chance… I made this just for you 😌"
+    ];
+
+    // Start music on first interaction
     document.body.addEventListener("click", () => {
         music.play();
     }, { once: true });
 
-    // YES button behavior
+    // YES CLICK
     yesBtn.addEventListener("click", () => {
-        yesScale += 0.2;
-        yesBtn.style.transform = `scale(${yesScale})`;
-
         card.innerHTML = `
             <h1>Happy Valentine’s Day ❤️</h1>
             <p>
@@ -125,24 +134,62 @@
                 laugh with you,<br>
                 and annoy you forever 💫
             </p>
+            <button id="startCountdown">Countdown begins ⏳</button>
         `;
-
         startHearts();
+
+        document.getElementById("startCountdown").addEventListener("click", startCountdown);
     });
 
-    // NO button behavior (tap-based)
+    // NO CLICK
     noBtn.addEventListener("click", () => {
-        noClicks++;
-        const x = Math.random() * 200 - 100;
-        const y = Math.random() * 200 - 100;
-        noBtn.style.transform = `translate(${x}px, ${y}px) scale(${1 - noClicks * 0.15})`;
+        if (noCount < noMessages.length) {
+            text.innerHTML = noMessages[noCount];
+            noCount++;
 
-        if (noClicks >= 4) {
+            const x = Math.random() * 200 - 100;
+            const y = Math.random() * 200 - 100;
+            noBtn.style.transform = `translate(${x}px, ${y}px)`;
+        } else {
             noBtn.style.display = "none";
+            text.innerHTML = "Okay… I’ll wait right here ❤️";
         }
     });
 
-    // Floating hearts animation
+    // Countdown Logic
+    function startCountdown() {
+        const btn = document.getElementById("startCountdown");
+        btn.remove();
+
+        const countdownEl = document.createElement("div");
+        countdownEl.className = "countdown";
+        card.appendChild(countdownEl);
+
+        const now = new Date();
+        let year = now.getFullYear();
+        const valentine = new Date(year, 1, 14);
+
+        if (now > valentine) {
+            year++;
+        }
+
+        const target = new Date(year, 1, 14);
+
+        setInterval(() => {
+            const diff = target - new Date();
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+            const mins = Math.floor((diff / (1000 * 60)) % 60);
+            const secs = Math.floor((diff / 1000) % 60);
+
+            countdownEl.innerHTML = `
+                <div>Until our Valentine’s Day 💕</div>
+                <strong>${days}d ${hours}h ${mins}m ${secs}s</strong>
+            `;
+        }, 1000);
+    }
+
+    // Floating hearts
     function startHearts() {
         setInterval(() => {
             const heart = document.createElement("div");
@@ -151,12 +198,12 @@
             heart.style.left = Math.random() * 100 + "vw";
             document.body.appendChild(heart);
 
-            setTimeout(() => {
-                heart.remove();
-            }, 4000);
+            setTimeout(() => heart.remove(), 4000);
         }, 300);
     }
 </script>
 
 </body>
 </html>
+
+
